@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a2e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* PHS Scotland Brand Colours */
+  --color-phs-green: #5DAF4F;
+  --color-phs-green-light: #7BC96D;
+  --color-phs-green-dark: #4A9340;
+  --color-phs-green-50: #f0faf0;
+  --color-phs-green-100: #dcf5d9;
+  --color-phs-green-200: #b8eab3;
+
+  --color-phs-teal: #5BA89D;
+  --color-phs-teal-light: #7BBFB5;
+  --color-phs-teal-dark: #4A8F85;
+  --color-phs-teal-50: #f0faf8;
+
+  --color-phs-navy: #2B4C7E;
+  --color-phs-navy-light: #3D6299;
+  --color-phs-navy-dark: #1E3A5F;
+  --color-phs-navy-50: #f0f4fa;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
