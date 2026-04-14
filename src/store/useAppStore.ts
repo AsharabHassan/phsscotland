@@ -1,7 +1,19 @@
 import { create } from "zustand";
-import type { AppState } from "@/types";
+import type { AppState, StepNumber, EntryPath } from "@/types";
 
-export const useAppStore = create<AppState>((set) => ({
+interface ExtendedAppState extends AppState {
+  currentStep: StepNumber;
+  entryPath: EntryPath | null;
+  goToStep: (step: StepNumber) => void;
+  setEntryPath: (path: EntryPath) => void;
+}
+
+export const useAppStore = create<ExtendedAppState>((set) => ({
+  currentStep: 1,
+  entryPath: null,
+  goToStep: (step) => set({ currentStep: step }),
+  setEntryPath: (path) => set({ entryPath: path }),
+
   photo: null,
   photoPreview: null,
   setPhoto: (file, preview) => set({ photo: file, photoPreview: preview }),
@@ -20,6 +32,8 @@ export const useAppStore = create<AppState>((set) => ({
 
   reset: () =>
     set({
+      currentStep: 1,
+      entryPath: null,
       photo: null,
       photoPreview: null,
       assessment: null,

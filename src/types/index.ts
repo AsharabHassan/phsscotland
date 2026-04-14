@@ -45,6 +45,10 @@ export interface PricingEntry {
   roofCoating: number;
 }
 
+export type EntryPath = "photo" | "no-photo";
+
+export type StepNumber = 1 | 2 | 3 | 4 | 5;
+
 export interface AppState {
   photo: File | null;
   photoPreview: string | null;
