@@ -28,6 +28,13 @@
   --color-phs-navy-light: #3D6299;
   --color-phs-navy-dark: #1E3A5F;
   --color-phs-navy-50: #f0f4fa;
+
+  --color-urgency-red: #E53E3E;
+  --color-urgency-orange: #DD6B20;
+  --color-gold: #F6AD55;
+  --color-severity-high: #E53E3E;
+  --color-severity-med: #F6AD55;
+  --color-severity-low: #5DAF4F;
 }
 
 body {
