@@ -4,8 +4,15 @@ import type { AssessmentResult } from "@/types";
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function analyseExterior(
-  base64Image: string
+  base64Image: string,
+  mimeType?: string
 ): Promise<AssessmentResult> {
+  const mediaType = (mimeType ?? "image/jpeg") as
+    | "image/jpeg"
+    | "image/png"
+    | "image/gif"
+    | "image/webp";
+
   const response = await client.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 1024,
@@ -17,7 +24,7 @@ export async function analyseExterior(
             type: "image",
             source: {
               type: "base64",
-              media_type: "image/jpeg",
+              media_type: mediaType,
               data: base64Image,
             },
           },

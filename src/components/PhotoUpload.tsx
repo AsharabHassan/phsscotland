@@ -59,12 +59,14 @@ export function PhotoUpload() {
 
     const reader = new FileReader();
     reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1];
+      const dataUrl = reader.result as string;
+      const mimeType = dataUrl.split(";")[0].split(":")[1];
+      const base64 = dataUrl.split(",")[1];
 
       const assessPromise = fetch("/api/assess", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64 }),
+        body: JSON.stringify({ image: base64, mimeType }),
       })
         .then(async (res) => {
           if (res.ok) setAssessment(await res.json());
@@ -74,7 +76,7 @@ export function PhotoUpload() {
       const afterPromise = fetch("/api/generate-after", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, color: selectedColor }),
+        body: JSON.stringify({ image: base64, color: selectedColor, mimeType }),
       })
         .then(async (res) => {
           if (res.ok) {

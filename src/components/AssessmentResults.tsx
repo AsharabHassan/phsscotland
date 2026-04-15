@@ -48,7 +48,26 @@ export function AssessmentResults() {
   const goToStep = useAppStore((s) => s.goToStep);
   const [expanded, setExpanded] = useState(false);
 
-  if (!assessment) return null;
+  if (!assessment) {
+    return (
+      <div className="flex flex-col items-center px-5 py-16 text-center">
+        <span className="mb-4 text-5xl">⚠️</span>
+        <h2 className="text-lg font-extrabold text-foreground mb-2">
+          Assessment Unavailable
+        </h2>
+        <p className="text-sm text-gray-500 leading-relaxed mb-6">
+          We couldn&apos;t analyse your photo. Please try again with a clear
+          image of your property&apos;s exterior.
+        </p>
+        <button
+          onClick={() => goToStep(2)}
+          className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-phs-green to-phs-green-dark px-6 text-sm font-bold text-white"
+        >
+          ↩ Try Again
+        </button>
+      </div>
+    );
+  }
 
   const style = conditionStyles[assessment.overallCondition];
 

@@ -5,11 +5,11 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const { image } = await req.json();
+    const { image, mimeType } = await req.json();
     if (!image || typeof image !== "string") {
       return NextResponse.json({ error: "Missing image" }, { status: 400 });
     }
-    const result = await analyseExterior(image);
+    const result = await analyseExterior(image, mimeType);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Assessment error:", error);

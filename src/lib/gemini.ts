@@ -4,7 +4,8 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GE
 
 export async function generateAfterImage(
   base64Image: string,
-  color?: string
+  color?: string,
+  mimeType?: string
 ): Promise<string> {
   const colorInstruction = color
     ? `Paint the exterior walls in a ${color} colour.`
@@ -20,7 +21,7 @@ export async function generateAfterImage(
           parts: [
             {
               inlineData: {
-                mimeType: "image/jpeg",
+                mimeType: mimeType ?? "image/jpeg",
                 data: base64Image,
               },
             },
