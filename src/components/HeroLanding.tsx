@@ -52,15 +52,6 @@ export function HeroLanding() {
         >
           📸 Upload / Take a Photo
         </button>
-        <button
-          onClick={() => {
-            setEntryPath("no-photo");
-            goToStep(3);
-          }}
-          className="flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-phs-navy text-[15px] font-bold text-phs-navy transition-transform active:scale-[0.98]"
-        >
-          📝 No Photo? Get Your Link
-        </button>
       </div>
 
       {/* Trust badges */}
