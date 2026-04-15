@@ -33,6 +33,33 @@ function resizeImage(file: File, maxSide: number): Promise<File> {
   });
 }
 
+const MOCKUP_OPTIONS = [
+  {
+    file: "Before 1.jpg",
+    label: "Bungalow",
+    desc: "Single storey",
+    icon: "🏡",
+  },
+  {
+    file: "Before 2.jpg",
+    label: "Detached",
+    desc: "Standalone house",
+    icon: "🏠",
+  },
+  {
+    file: "Before 3.jpg",
+    label: "Semi-Detached",
+    desc: "Joined pair",
+    icon: "🏘️",
+  },
+  {
+    file: "Before 5.jpg",
+    label: "Terraced",
+    desc: "Row house",
+    icon: "🏚️",
+  },
+];
+
 const COLOUR_OPTIONS = [
   { name: "White", hex: "#F5F5F0" },
   { name: "Cream", hex: "#F5E6C8" },
@@ -77,10 +104,10 @@ export function PhotoUpload() {
     if (cameraRef.current) cameraRef.current.value = "";
   }
 
-  async function loadMockup() {
-    const res = await fetch("/images/mockup-before.webp");
+  async function loadMockup(filename: string) {
+    const res = await fetch(`/images/${encodeURIComponent(filename)}`);
     const blob = await res.blob();
-    const file = new File([blob], "mockup-before.webp", { type: "image/webp" });
+    const file = new File([blob], filename, { type: "image/jpeg" });
     handleFile(file);
   }
 
@@ -182,16 +209,32 @@ export function PhotoUpload() {
 
           <div className="mt-3 flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-[11px] font-semibold text-gray-400">or</span>
+            <span className="text-[11px] font-semibold text-gray-400">or try a similar property</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
 
-          <button
-            onClick={loadMockup}
-            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-phs-navy/20 bg-phs-navy/5 text-sm font-bold text-phs-navy"
-          >
-            🏠 Try with a Mock-Up Property
-          </button>
+          <div className="mt-3 grid grid-cols-2 gap-2.5">
+            {MOCKUP_OPTIONS.map((opt) => (
+              <button
+                key={opt.file}
+                onClick={() => loadMockup(opt.file)}
+                className="flex flex-col overflow-hidden rounded-xl border-2 border-gray-200 bg-white text-left transition-all active:scale-[0.97] hover:border-phs-navy/40"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/images/${encodeURIComponent(opt.file)}`}
+                  alt={opt.label}
+                  className="h-24 w-full object-cover"
+                />
+                <div className="px-2.5 py-2">
+                  <div className="text-xs font-extrabold text-foreground">
+                    {opt.icon} {opt.label}
+                  </div>
+                  <div className="text-[10px] text-gray-400">{opt.desc}</div>
+                </div>
+              </button>
+            ))}
+          </div>
         </>
       ) : (
         <>
