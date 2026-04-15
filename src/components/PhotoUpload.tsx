@@ -46,6 +46,13 @@ export function PhotoUpload() {
     if (cameraRef.current) cameraRef.current.value = "";
   }
 
+  async function loadMockup() {
+    const res = await fetch("/images/mockup-before.webp");
+    const blob = await res.blob();
+    const file = new File([blob], "mockup-before.webp", { type: "image/webp" });
+    handleFile(file);
+  }
+
   async function analyse() {
     if (!photo) return;
     setIsAnalysing(true);
@@ -138,6 +145,19 @@ export function PhotoUpload() {
             className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-phs-green to-phs-green-dark text-sm font-bold text-white"
           >
             📷 Open Camera
+          </button>
+
+          <div className="mt-3 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="text-[11px] font-semibold text-gray-400">or</span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          <button
+            onClick={loadMockup}
+            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-phs-navy/20 bg-phs-navy/5 text-sm font-bold text-phs-navy"
+          >
+            🏠 Try with a Mock-Up Property
           </button>
         </>
       ) : (
