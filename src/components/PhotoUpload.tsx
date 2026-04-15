@@ -28,6 +28,7 @@ export function PhotoUpload() {
   const goToStep = useAppStore((s) => s.goToStep);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   function handleFile(file: File) {
     const preview = URL.createObjectURL(file);
@@ -42,6 +43,7 @@ export function PhotoUpload() {
   function clearPhoto() {
     setPhoto(null as unknown as File, null as unknown as string);
     if (fileRef.current) fileRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
   }
 
   async function analyse() {
@@ -98,8 +100,17 @@ export function PhotoUpload() {
 
   return (
     <div className="flex flex-col px-5 py-6">
+      {/* Upload from gallery — no capture attribute */}
       <input
         ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/heic,image/webp"
+        onChange={handleChange}
+        className="hidden"
+      />
+      {/* Camera only — capture forces rear camera */}
+      <input
+        ref={cameraRef}
         type="file"
         accept="image/jpeg,image/png,image/heic,image/webp"
         capture="environment"
@@ -123,7 +134,7 @@ export function PhotoUpload() {
           </button>
 
           <button
-            onClick={() => fileRef.current?.click()}
+            onClick={() => cameraRef.current?.click()}
             className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-phs-green to-phs-green-dark text-sm font-bold text-white"
           >
             📷 Open Camera
