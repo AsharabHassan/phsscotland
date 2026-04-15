@@ -1,9 +1,11 @@
 "use client";
 
+const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "447000000000";
+
 export function WhatsAppFloat() {
   return (
     <a
-      href="https://wa.me/447000000000"
+      href={`https://wa.me/${phone}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

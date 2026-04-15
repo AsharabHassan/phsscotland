@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
-import type { IssueSeverity } from "@/types";
+import type { IssueSeverity, ServiceType } from "@/types";
 
 const conditionStyles = {
   good: { bg: "bg-green-100", text: "text-green-800", label: "GOOD CONDITION" },
@@ -15,6 +15,30 @@ const severityColor: Record<IssueSeverity, string> = {
   high: "bg-severity-high",
   medium: "bg-severity-med",
   low: "bg-severity-low",
+};
+
+interface ServicePricing {
+  rateLabel: string;
+  startsFrom: string | null;
+}
+
+const servicePricing: Record<ServiceType, ServicePricing> = {
+  "wall-coating": {
+    rateLabel: "£40/sqm",
+    startsFrom: "£1,950",
+  },
+  "roof-coating": {
+    rateLabel: "£25–£40/sqm",
+    startsFrom: "£1,450",
+  },
+  "chemical-cleaning": {
+    rateLabel: "Price on consultation",
+    startsFrom: null,
+  },
+  "exterior-painting": {
+    rateLabel: "Price on consultation",
+    startsFrom: null,
+  },
 };
 
 export function AssessmentResults() {
@@ -64,6 +88,52 @@ export function AssessmentResults() {
 
       {photoPreview && afterImage && (
         <BeforeAfterSlider beforeSrc={photoPreview} afterSrc={afterImage} />
+      )}
+
+      {/* Pricing Section */}
+      {assessment.recommendations.length > 0 && (
+        <div className="mx-5 my-3">
+          <h3 className="mb-2.5 text-xs font-bold uppercase tracking-wide text-gray-500">
+            Estimated Pricing
+          </h3>
+          <div className="space-y-2">
+            {assessment.recommendations.map((rec) => {
+              const pricing = servicePricing[rec.service];
+              return (
+                <div
+                  key={rec.service}
+                  className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                >
+                  <div>
+                    <div className="text-sm font-bold text-foreground">
+                      {rec.label}
+                    </div>
+                    <div className="text-[11px] text-gray-400">
+                      {pricing.rateLabel}
+                    </div>
+                  </div>
+                  {pricing.startsFrom ? (
+                    <div className="text-right">
+                      <div className="text-[10px] font-semibold uppercase text-gray-400">
+                        Starts from
+                      </div>
+                      <div className="text-base font-extrabold text-phs-green-dark">
+                        {pricing.startsFrom}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="rounded-lg bg-phs-navy/10 px-2.5 py-1 text-[11px] font-bold text-phs-navy">
+                      Get Quote
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-center text-[10px] text-gray-400">
+            * Final pricing confirmed after FREE on-site survey
+          </p>
+        </div>
       )}
 
       <button

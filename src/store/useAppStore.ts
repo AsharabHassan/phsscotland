@@ -4,15 +4,19 @@ import type { AppState, StepNumber, EntryPath } from "@/types";
 interface ExtendedAppState extends AppState {
   currentStep: StepNumber;
   entryPath: EntryPath | null;
+  selectedColor: string | null;
   goToStep: (step: StepNumber) => void;
   setEntryPath: (path: EntryPath) => void;
+  setSelectedColor: (color: string) => void;
 }
 
 export const useAppStore = create<ExtendedAppState>((set) => ({
   currentStep: 1,
   entryPath: null,
+  selectedColor: null,
   goToStep: (step) => set({ currentStep: step }),
   setEntryPath: (path) => set({ entryPath: path }),
+  setSelectedColor: (color) => set({ selectedColor: color }),
 
   photo: null,
   photoPreview: null,
@@ -34,6 +38,7 @@ export const useAppStore = create<ExtendedAppState>((set) => ({
     set({
       currentStep: 1,
       entryPath: null,
+      selectedColor: null,
       photo: null,
       photoPreview: null,
       assessment: null,

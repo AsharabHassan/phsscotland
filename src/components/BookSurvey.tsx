@@ -43,7 +43,7 @@ export function BookSurvey() {
           </p>
           <p className="text-xs text-gray-400">
             Having trouble?{" "}
-            <a href="tel:+447000000000" className="font-bold text-phs-navy">
+            <a href={`tel:+${process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "447000000000"}`} className="font-bold text-phs-navy">
               Call us to book
             </a>
           </p>

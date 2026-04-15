@@ -3,11 +3,25 @@
 import { useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
+const COLOUR_OPTIONS = [
+  { name: "White", hex: "#F5F5F0" },
+  { name: "Cream", hex: "#F5E6C8" },
+  { name: "Ivory", hex: "#FFFFF0" },
+  { name: "Sandstone", hex: "#D2B48C" },
+  { name: "Light Grey", hex: "#C8C8C8" },
+  { name: "Dark Grey", hex: "#6B6B6B" },
+  { name: "Sage Green", hex: "#9CAF88" },
+  { name: "Duck Egg Blue", hex: "#B0D0D3" },
+  { name: "Terracotta", hex: "#C67B4E" },
+];
+
 export function PhotoUpload() {
   const photo = useAppStore((s) => s.photo);
   const photoPreview = useAppStore((s) => s.photoPreview);
   const isAnalysing = useAppStore((s) => s.isAnalysing);
+  const selectedColor = useAppStore((s) => s.selectedColor);
   const setPhoto = useAppStore((s) => s.setPhoto);
+  const setSelectedColor = useAppStore((s) => s.setSelectedColor);
   const setIsAnalysing = useAppStore((s) => s.setIsAnalysing);
   const setAssessment = useAppStore((s) => s.setAssessment);
   const setAfterImage = useAppStore((s) => s.setAfterImage);
@@ -38,35 +52,32 @@ export function PhotoUpload() {
     reader.onload = async () => {
       const base64 = (reader.result as string).split(",")[1];
 
-      try {
-        const [assessRes, afterRes] = await Promise.all([
-          fetch("/api/assess", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: base64 }),
-          }),
-          fetch("/api/generate-after", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: base64 }),
-          }),
-        ]);
+      const assessPromise = fetch("/api/assess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64 }),
+      })
+        .then(async (res) => {
+          if (res.ok) setAssessment(await res.json());
+        })
+        .catch((err) => console.error("Assessment failed:", err));
 
-        if (assessRes.ok) {
-          const data = await assessRes.json();
-          setAssessment(data);
-        }
+      const afterPromise = fetch("/api/generate-after", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64, color: selectedColor }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setAfterImage(data.image);
+          }
+        })
+        .catch((err) => console.error("After-image failed:", err));
 
-        if (afterRes.ok) {
-          const afterData = await afterRes.json();
-          setAfterImage(afterData.image);
-        }
-      } catch {
-        // Error handled — user sees retry in UI
-      } finally {
-        setIsAnalysing(false);
-        goToStep(3);
-      }
+      await Promise.all([assessPromise, afterPromise]);
+      setIsAnalysing(false);
+      goToStep(3);
     };
     reader.readAsDataURL(photo);
   }
@@ -133,6 +144,38 @@ export function PhotoUpload() {
             >
               ↻ Retake
             </button>
+          </div>
+
+          {/* Colour Picker */}
+          <div className="mt-4">
+            <label className="mb-2 block text-[11px] font-bold uppercase tracking-wide text-gray-500">
+              Choose your preferred colour
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {COLOUR_OPTIONS.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() => setSelectedColor(c.name)}
+                  className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2.5 py-2 transition-all ${
+                    selectedColor === c.name
+                      ? "border-phs-green bg-phs-green-50 shadow-sm"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <span
+                    className={`h-7 w-7 rounded-full border border-gray-300 ${
+                      selectedColor === c.name
+                        ? "ring-2 ring-phs-green ring-offset-1"
+                        : ""
+                    }`}
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <span className="text-[10px] font-semibold text-gray-600">
+                    {c.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <button

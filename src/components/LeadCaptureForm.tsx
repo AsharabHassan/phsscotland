@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { captureMetaTracking } from "@/lib/meta";
 
 export function LeadCaptureForm() {
   const entryPath = useAppStore((s) => s.entryPath);
+  const assessment = useAppStore((s) => s.assessment);
+  const selectedColor = useAppStore((s) => s.selectedColor);
   const setLeadData = useAppStore((s) => s.setLeadData);
   const goToStep = useAppStore((s) => s.goToStep);
 
@@ -24,12 +27,13 @@ export function LeadCaptureForm() {
     setSubmitting(true);
 
     const lead = { name, email, phone, postcode };
+    const meta = captureMetaTracking("Lead");
 
     try {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...lead, path: entryPath }),
+        body: JSON.stringify({ ...lead, path: entryPath, selectedColor, assessment, meta }),
       });
 
       if (!res.ok) throw new Error("Failed to submit");
@@ -60,7 +64,7 @@ export function LeadCaptureForm() {
           anytime to analyse your property.
         </p>
         <a
-          href="https://wa.me/447000000000"
+          href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "447000000000"}`}
           className="mt-6 flex h-12 items-center justify-center gap-2 rounded-xl bg-green-500 px-6 text-sm font-bold text-white"
         >
           💬 WhatsApp Us
