@@ -2,6 +2,9 @@ function getWebhookUrl() {
   return process.env.GHL_WEBHOOK_URL ?? "";
 }
 
+const MAX_ISSUE_SLOTS = 5;
+const MAX_RECOMMENDATION_SLOTS = 5;
+
 interface GhlContactInput {
   name: string;
   email: string;
@@ -10,6 +13,7 @@ interface GhlContactInput {
   path?: string;
   selectedColor?: string;
   assessment?: {
+    propertyType?: string;
     overallCondition?: string;
     summary?: string;
     issues?: { name: string; severity: string; description: string }[];
@@ -28,17 +32,37 @@ interface GhlContactInput {
 }
 
 export async function sendLeadToGhl(data: GhlContactInput) {
-  const [firstName, ...rest] = data.name.split(" ");
+  const [firstName, ...rest] = data.name.trim().split(/\s+/);
   const lastName = rest.join(" ");
 
-  // Flatten assessment into simple strings for GHL custom field mapping
   const issues = data.assessment?.issues ?? [];
   const recs = data.assessment?.recommendations ?? [];
 
+  // Each issue gets its own set of top-level fields so GHL can map
+  // issue1Name, issue1Severity, issue1Description, etc. individually.
+  const issueFields: Record<string, string> = {};
+  for (let i = 0; i < MAX_ISSUE_SLOTS; i++) {
+    const issue = issues[i];
+    const n = i + 1;
+    issueFields[`issue${n}Name`] = issue?.name ?? "";
+    issueFields[`issue${n}Severity`] = issue?.severity ?? "";
+    issueFields[`issue${n}Description`] = issue?.description ?? "";
+  }
+
+  const recFields: Record<string, string> = {};
+  for (let i = 0; i < MAX_RECOMMENDATION_SLOTS; i++) {
+    const rec = recs[i];
+    const n = i + 1;
+    recFields[`recommendation${n}Service`] = rec?.service ?? "";
+    recFields[`recommendation${n}Label`] = rec?.label ?? "";
+    recFields[`recommendation${n}Reason`] = rec?.reason ?? "";
+  }
+
   const payload: Record<string, string | number> = {
-    // ── Standard contact fields (map directly in GHL) ──
+    // ── Standard contact fields (auto-map in GHL) ──
     firstName,
     lastName,
+    fullName: data.name,
     email: data.email,
     phone: data.phone,
     postalCode: data.postcode,
@@ -47,11 +71,15 @@ export async function sendLeadToGhl(data: GhlContactInput) {
     // ── Lead context ──
     entryPath: data.path ?? "",
     preferredColour: data.selectedColor ?? "",
+    propertyType: data.assessment?.propertyType ?? "",
 
-    // ── Assessment data (flat for custom field mapping) ──
+    // ── Assessment overview ──
     assessmentCondition: data.assessment?.overallCondition ?? "",
     assessmentSummary: data.assessment?.summary ?? "",
     assessmentIssueCount: issues.length,
+    assessmentRecommendationCount: recs.length,
+
+    // ── Combined summary strings (nice for single at-a-glance GHL field) ──
     assessmentIssues: issues
       .map((i) => `${i.name} (${i.severity}): ${i.description}`)
       .join(" | "),
@@ -59,6 +87,10 @@ export async function sendLeadToGhl(data: GhlContactInput) {
       .map((r) => `${r.label}: ${r.reason}`)
       .join(" | "),
     assessmentServices: recs.map((r) => r.service).join(", "),
+
+    // ── Per-item fields (map each individually in GHL) ──
+    ...issueFields,
+    ...recFields,
 
     // ── Meta / Facebook CAPI fields ──
     meta_fbclid: data.meta?.meta_fbclid ?? "",

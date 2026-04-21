@@ -21,10 +21,17 @@ describe("sendLeadToGhl", () => {
       postcode: "EH1 1AA",
       path: "photo",
       assessment: {
+        propertyType: "semi-detached",
         overallCondition: "poor",
         summary: "Needs work",
-        issues: [{ name: "Moss", severity: "high", description: "Moss on walls" }],
-        recommendations: [{ service: "wall-coating", label: "Wall Coating", reason: "Protect walls" }],
+        issues: [
+          { name: "Moss", severity: "high", description: "Moss on walls" },
+          { name: "Render cracks", severity: "medium", description: "Hairline cracks" },
+        ],
+        recommendations: [
+          { service: "wall-coating", label: "Wall Coating", reason: "Protect walls" },
+          { service: "chemical-cleaning", label: "Chemical Clean", reason: "Kill moss" },
+        ],
       },
       meta: {
         meta_fbclid: "abc123",
@@ -43,25 +50,48 @@ describe("sendLeadToGhl", () => {
       expect.objectContaining({ method: "POST" })
     );
 
-    // Verify payload is flat and contains all expected fields
     const call = (fetch as jest.Mock).mock.calls[0];
     const body = JSON.parse(call[1].body);
 
+    // Standard contact fields
     expect(body.firstName).toBe("John");
     expect(body.lastName).toBe("Smith");
+    expect(body.fullName).toBe("John Smith");
     expect(body.email).toBe("john@test.com");
     expect(body.phone).toBe("+447700900000");
     expect(body.postalCode).toBe("EH1 1AA");
     expect(body.source).toBe("PHS AI Assessment");
     expect(body.entryPath).toBe("photo");
+    expect(body.propertyType).toBe("semi-detached");
 
-    // Assessment fields are flat strings
+    // Assessment overview
     expect(body.assessmentCondition).toBe("poor");
     expect(body.assessmentSummary).toBe("Needs work");
-    expect(body.assessmentIssueCount).toBe(1);
+    expect(body.assessmentIssueCount).toBe(2);
+    expect(body.assessmentRecommendationCount).toBe(2);
+
+    // Combined summary strings
     expect(body.assessmentIssues).toContain("Moss (high)");
     expect(body.assessmentRecommendations).toContain("Wall Coating");
-    expect(body.assessmentServices).toBe("wall-coating");
+    expect(body.assessmentServices).toBe("wall-coating, chemical-cleaning");
+
+    // Per-item issue slots
+    expect(body.issue1Name).toBe("Moss");
+    expect(body.issue1Severity).toBe("high");
+    expect(body.issue1Description).toBe("Moss on walls");
+    expect(body.issue2Name).toBe("Render cracks");
+    expect(body.issue2Severity).toBe("medium");
+    expect(body.issue2Description).toBe("Hairline cracks");
+    // Unused slots are empty strings, not missing — keeps GHL mapping stable
+    expect(body.issue3Name).toBe("");
+    expect(body.issue5Description).toBe("");
+
+    // Per-item recommendation slots
+    expect(body.recommendation1Service).toBe("wall-coating");
+    expect(body.recommendation1Label).toBe("Wall Coating");
+    expect(body.recommendation1Reason).toBe("Protect walls");
+    expect(body.recommendation2Service).toBe("chemical-cleaning");
+    expect(body.recommendation3Service).toBe("");
 
     // Meta CAPI fields
     expect(body.meta_fbclid).toBe("abc123");
